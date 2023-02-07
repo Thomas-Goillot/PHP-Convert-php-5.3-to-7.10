@@ -158,6 +158,29 @@ class Convert {
 
     }
 
+
+    public function checkPatternAndReplace(string $file, string $search, string $pattern, string $replace, string $content = ""): string{
+        //in the content of the file get the line where is this $xajax->printJavascript('../commun/xajax_05/');
+        preg_match_all($pattern, $content, $matches);
+
+        //if matches is empty, then continue
+        if (count($matches[0]) == 0) {
+            return "";
+        }
+
+        //replace the path with the new path
+        $newLine = str_replace($search, $replace, $matches[0][0]);
+
+        //replace the line in the content
+        $content = str_replace($matches[0][0], $newLine, $content);
+
+        //save the content in the file
+        file_put_contents($this->tempFolder . $file, $content);
+
+        return $matches[0][0];
+    }
+
+
     /* 
     * @param bool $debug
     * @return void
@@ -199,30 +222,35 @@ class Convert {
             try{
                 $content = file_get_contents($this->tempFolder.$file);
             }catch(\ErrorException $e){
-                $this->log->warning("Cannot read the file ".$this->tempFolder.$file . " : " . $e->getMessage());
+                if($debug) $this->log->warning("Cannot read the file ".$this->tempFolder.$file . " : " . $e->getMessage());
                 $errors++;
                 continue;
             }
 
-            //in the content of the file get the line where is this $xajax->printJavascript('../commun/xajax_05/');
-            $pattern = '/\$xajax->printJavascript\((.*?)\)/';
-            preg_match_all($pattern, $content, $matches);
+            $matches = ""; 
+            $matches = $this->checkPatternAndReplace($file, "../commun/xajax_05/", '/\$xajax->printJavascript\((.*?)\)/', $newPath, $content);
 
-            //if matches is empty, then continue
-            if(count($matches[0]) == 0) continue;
+            if ($debug == true && $matches != "") {
+                $this->log->debug("file: " . $file . " - line: " . $matches . "\n");
+            }  
 
-            //replace the path with the new path
-            $newLine = str_replace("../commun/xajax_05/", $newPath, $matches[0][0]);
+
+            /* 
+            ================= MAKE THIS WORK =================
+            */
+
+
+            $matches = "";
+            $matches = $this->checkPatternAndReplace($file, "../commun/xajax_05/xajax_core/xajax.inc.php", '/xajax_core\/xajax.inc.php/', $newPath. "xajax_core/xajax.inc.php", $content);
+
+            if ($debug == true && $matches != "") {
+                $this->log->debug("file: " . $file . " - line: " . $matches . "\n");
+            }   
             
-            //replace the line in the content
-            $content = str_replace($matches[0][0], $newLine, $content);
 
-            //save the content in the file
-            file_put_contents($this->tempFolder.$file, $content);
+    
 
-            if($debug == true){
-                $this->log->debug("file: " . $file . " - line: " . $matches[0][0] . " - newLine: " . $newLine . "\n");
-            }                
+             
         }
 
         restore_error_handler();
@@ -230,8 +258,11 @@ class Convert {
         if($errors > $totalFiles / 2){
             $this->log->error("More than 50% of the files could not be read. Please check the permissions of the folder ".$this->tempFolder);
         }
+        else if($errors == 0){
+            $this->log->success("All files were read successfully");
+        }
         else{
-            $this->log->info("The path of xajax has been changed in ".$totalFiles." files.");
+           $this->log->info("The path of xajax has been checked in " . $totalFiles . " files and " . $errors . " files could not be read.");
         }
 
     }
