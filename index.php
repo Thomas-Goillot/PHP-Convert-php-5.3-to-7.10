@@ -152,21 +152,26 @@ class Convert {
     public function detectXajax(): bool{
 
         $files = glob($this->tempFolder . '**/*.php');
-        $filesWithClass = array();
+
+        //read the content of every file and search for xajax
         foreach ($files as $file) {
+
+            //check the filename first
+            $fileName = pathinfo($file, PATHINFO_FILENAME);
+            if(strpos($fileName, "xajax") !== false){
+                return true;
+            }
+
+            //then check the content
             $content = file_get_contents($file);
-            $pattern = '/xajax\s+(\w+)/';
+            $pattern = '/xajax/';
             preg_match_all($pattern, $content, $matches);
-            if(count($matches[1]) > 0){
-                array_push($filesWithClass, $file);
+            if(count($matches[0]) > 0){
+                return true;
             }
         }
 
-        if(count($filesWithClass) > 0){
-            return true;
-        } else {
-            return false;
-        }
+        return false;
 
     }
 
