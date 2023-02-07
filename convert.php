@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 class Convert {
 
     /* 
@@ -16,6 +17,10 @@ class Convert {
     */
     public string $returnFolder;
 
+    /* 
+    * @param Log $log
+    */
+    public Log $log;
 
     /* 
     * @param string $projectFolder
@@ -23,6 +28,8 @@ class Convert {
     * @param string $returnFolder
     */
     public function __construct(string $projectFolder, string $tempFolder, string $returnFolder){
+
+        $this->log = new Log();
 
         if(!is_dir($tempFolder)){
             mkdir($tempFolder, 0777, true);
@@ -37,22 +44,6 @@ class Convert {
     }
 
     /* 
-    * @param string $dir
-    * @return bool
-    */
-    public function dirIsEmpty(string $dir): bool{
-        $handle = opendir($dir);
-        while (false !== ($entry = readdir($handle))) {
-            if ($entry != "." && $entry != "..") {
-                closedir($handle);
-                return false;
-            }
-        }
-        closedir($handle);
-        return true;
-    }
-
-    /* 
     * @param string $src
     * @param string $dest
     * @return void
@@ -63,10 +54,6 @@ class Convert {
         if($dest === "") $dest = $this->tempFolder;
 
         $ignoreFileExtensions = array("pdf", "xls", "xlsx", "csv");
-
-        if(!$this->dirIsEmpty($dest)){
-            $this->clearFolder($this->tempFolder);
-        }
 
         foreach (scandir($src) as $file) {
 
@@ -171,16 +158,82 @@ class Convert {
 
     }
 
-    public function changeXajaxPath(){
-        $files = glob($this->tempFolder . '**/*.php');
+    /* 
+    * @param bool $debug
+    * @return void
+    */
+    public function changeXajaxPath(bool $debug = false): void{
+
+        //get all files
+        $files = scandir($this->tempFolder);
+    
+        //remove the . and .. from the array
+        unset($files[0]);
+        unset($files[1]);
+
+        //add the subfiles to the array (recursive)
+        foreach ($files as $key => $file) {
+            if(is_dir($this->tempFolder.$file)){
+                $subFiles = scandir($this->tempFolder.$file);
+                unset($subFiles[0]);
+                unset($subFiles[1]);
+                foreach ($subFiles as $subFile) {
+                    array_push($files, $file."/".$subFile);
+                }
+                unset($files[$key]);
+            }
+        }
+
+        //reindex the array
+        $files = array_values($files);
+        $totalFiles = count($files);
+        $errors = 0;
+
+        $newPath = "xajaxPHP7.2/";
+
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new \ErrorException($message, $severity, $severity, $file, $line);
+        });
+
         foreach ($files as $file) {
-            $content = file_get_contents($file);
-            
-            //find something like $xajax->printJavascript('../commun/xajax_05/');   
-            $pattern = '/\$xajax->printJavascript\((.*)\);/';
+            try{
+                $content = file_get_contents($this->tempFolder.$file);
+            }catch(\ErrorException $e){
+                $this->log->warning("Cannot read the file ".$this->tempFolder.$file . " : " . $e->getMessage());
+                $errors++;
+                continue;
+            }
+
+            //in the content of the file get the line where is this $xajax->printJavascript('../commun/xajax_05/');
+            $pattern = '/\$xajax->printJavascript\((.*?)\)/';
             preg_match_all($pattern, $content, $matches);
 
+            //if matches is empty, then continue
+            if(count($matches[0]) == 0) continue;
+
+            //replace the path with the new path
+            $newLine = str_replace("../commun/xajax_05/", $newPath, $matches[0][0]);
+            
+            //replace the line in the content
+            $content = str_replace($matches[0][0], $newLine, $content);
+
+            //save the content in the file
+            file_put_contents($this->tempFolder.$file, $content);
+
+            if($debug == true){
+                $this->log->debug("file: " . $file . " - line: " . $matches[0][0] . " - newLine: " . $newLine . "\n");
+            }                
         }
+
+        restore_error_handler();
+
+        if($errors > $totalFiles / 2){
+            $this->log->error("More than 50% of the files could not be read. Please check the permissions of the folder ".$this->tempFolder);
+        }
+        else{
+            $this->log->info("The path of xajax has been changed in ".$totalFiles." files.");
+        }
+
     }
 
     public function __destruct(){
@@ -189,5 +242,3 @@ class Convert {
 
 
 }
-
-?>

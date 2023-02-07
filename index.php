@@ -11,6 +11,7 @@ $log = new Log();
 
 
 //demander a l'utilisateur le chemin du dossier du projet
+/* $projectFolder = "D:\Documents\Projet\CPAM\art315_test"; */
 $log->ask("Enter the path of the project folder: ");
 $projectFolder = readline();
 $projectFolder = str_replace(" ", "", $projectFolder);
@@ -36,6 +37,8 @@ if($convert->copyToFolder()){
     exit;
 }
 
+
+
 //Get all files with class
 $filesWithClass = $convert->getAllFilesWithClass();
 
@@ -43,9 +46,6 @@ $filesWithClass = $convert->getAllFilesWithClass();
 foreach ($filesWithClass as $file) {
     $convert->replaceConstructor($file);
 }
-
-//Copy files from temp folder to return folder
-$convert->copyToFolder($tempFolder, $returnFolder);
 
 //Print all files edited
 if(count($filesWithClass) > 0){
@@ -64,10 +64,10 @@ $filesWithXajax = $convert->detectXajax();
 
 if($filesWithXajax){
     $log->info("Xajax detected in the project");
-    $log->ask("Do you want to add xajax for PHP 7.2 to the project? (y/n): ");
+    $log->ask("Do you want to add xajax for PHP 7.2 to the project? (y/n):  ");
 
     if(readline() == "y"){
-        if($convert->copyToFolder($xajaxFolder, $returnFolder)){
+        if($convert->copyToFolder($xajaxFolder, $tempFolder)){
             $log->success("Xajax has been added to the project");
         } else {
             $log->error("Xajax has not been added to the project");
@@ -76,13 +76,17 @@ if($filesWithXajax){
 
     $log->ask("Do you want to change the path of xajax path in the project? (y/n): ");
     if(readline() == "y"){
-        $convert->changeXajaxPath();
+        $log->ask("Do you want to activate the debug mode for the path (recommended)? (y/n): ");
+        $convert->changeXajaxPath(readline() == "y");
     }
 
 } else {
     $log->info("Xajax not detected in the project");
 }
 
-$log->success("The project has been converted successfully");
+//Copy files from temp folder to return folder
+$convert->copyToFolder($tempFolder, $returnFolder);
+
+$log->success("The project has been converted successfully (You can find the converted project in the return folder)");
 
 ?>
