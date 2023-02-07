@@ -228,10 +228,11 @@ $filesWithXajax = $convert->detectXajax();
 
 if($filesWithXajax){
     echo "Xajax as been detected on the project \n";
-    $xajaxAdd = readline("Do you want to update and add xajax to the project? (y/n)");
+    $xajaxAdd = readline("Do you want to update and add xajax to the project? (y/n): ");
 
     if($xajaxAdd == "y"){
         $convert->copyToFolder($xajaxFolder, $returnFolder);
+
     }
 
 } else {
