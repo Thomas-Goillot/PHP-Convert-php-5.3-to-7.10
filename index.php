@@ -175,6 +175,21 @@ class Convert {
 
     }
 
+    public function changeXajaxPath(){
+        $files = glob($this->tempFolder . '**/*.php');
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+
+            //check for $xajax->printJavascript() and change what's inside the parenthesis
+            $pattern = '/\$xajax->printJavascript\((.*)\)/';
+            preg_match_all($pattern, $content, $matches);
+            if(count($matches[0]) > 0){
+                $content = str_replace($matches[1][0], "'../xajaxPHP7.2'", $content);
+                file_put_contents($file, $content);
+            }
+        }
+    }
+
     public function __destruct(){
         $this->clearFolder($this->tempFolder);
     }
@@ -232,7 +247,12 @@ if($filesWithXajax){
 
     if($xajaxAdd == "y"){
         $convert->copyToFolder($xajaxFolder, $returnFolder);
+    }
 
+    $xajaxChangePath = readline("Do you want to change the path of xajax path in the project? (y/n): ");
+
+    if($xajaxChangePath == "y"){
+        $convert->changeXajaxPath();
     }
 
 } else {
