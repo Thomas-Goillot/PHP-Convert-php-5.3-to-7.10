@@ -2,7 +2,8 @@
 
 //$projectFolder = "C:\wamp\www\art315_prod";
 $tempFolder = "temp/";
-$return = "return/";
+$returnFolder = "return/";
+$xajaxFolder = "xajax/";
 
 class Convert {
 
@@ -17,16 +18,34 @@ class Convert {
     public $tempFolder;
 
     /* 
-    * @param string $return
+    * @param string $returnFolder
     */
-    public $return;
+    public $returnFolder;
 
-    public function __construct(string $projectFolder, string $tempFolder){
+    /* 
+    * @param string $projectFolder
+    * @param string $tempFolder
+    * @param string $returnFolder
+    */
+    public function __construct(string $projectFolder, string $tempFolder, string $returnFolder){
+
+        if(!is_dir($tempFolder)){
+            mkdir($tempFolder, 0777, true);
+        }
+
+        if(!is_dir($returnFolder)){
+            mkdir($returnFolder, 0777, true);
+        }
+
         $this->projectFolder = $projectFolder;
         $this->tempFolder = $tempFolder;
     }
 
-    public function dirIsEmpty(string $dir){
+    /* 
+    * @param string $dir
+    * @return bool
+    */
+    public function dirIsEmpty(string $dir): bool{
         $handle = opendir($dir);
         while (false !== ($entry = readdir($handle))) {
             if ($entry != "." && $entry != "..") {
@@ -38,7 +57,12 @@ class Convert {
         return true;
     }
 
-    public function copyToFolder(string $src = "", string $dest = ""){
+    /* 
+    * @param string $src
+    * @param string $dest
+    * @return void
+    */
+    public function copyToFolder(string $src = "", string $dest = ""): void{
 
         if($src === "") $src = $this->projectFolder;
         if($dest === "") $dest = $this->tempFolder;
@@ -65,7 +89,11 @@ class Convert {
         }
     }
 
-    public function clearFolder(string $src = ""){
+    /* 
+    * @param string $src
+    * @return void
+    */
+    public function clearFolder(string $src = ""): void{
 
         if($src === "") $src = $this->tempFolder;
 
@@ -82,7 +110,10 @@ class Convert {
         }
     }
 
-    public function getAllFilesWithClass(){
+    /* 
+    * @return array
+    */
+    public function getAllFilesWithClass(): array{
         $files = glob($this->tempFolder . '**/*.php');
         $filesWithClass = array();
         foreach ($files as $file) {
@@ -97,7 +128,11 @@ class Convert {
         return $filesWithClass;
     }
 
-    public function replaceConstructor(string $file){
+    /* 
+    * @param string $file
+    * @return void
+    */
+    public function replaceConstructor(string $file): void{
         $content = file_get_contents($file);
         $pattern = '/class\s+(\w+)/';
         preg_match_all($pattern, $content, $matches);
@@ -109,6 +144,34 @@ class Convert {
             $content = str_replace($functionName, "__construct", $content);
             file_put_contents($file, $content);
         }
+    }
+
+    /* 
+    * @return bool
+    */
+    public function detectXajax(): bool{
+
+        $files = glob($this->tempFolder . '**/*.php');
+        $filesWithClass = array();
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+            $pattern = '/xajax\s+(\w+)/';
+            preg_match_all($pattern, $content, $matches);
+            if(count($matches[1]) > 0){
+                array_push($filesWithClass, $file);
+            }
+        }
+
+        if(count($filesWithClass) > 0){
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public function __destruct(){
+        $this->clearFolder($this->tempFolder);
     }
 
 
@@ -125,11 +188,11 @@ if(!is_dir($projectFolder)){
 }
 
 
-$convert = new Convert($projectFolder, $tempFolder);
+$convert = new Convert($projectFolder, $tempFolder, $returnFolder);
 
 //Clear all working folders
-$convert->clearFolder($return);
-$convert->clearFolder();
+$convert->clearFolder($returnFolder);
+$convert->clearFolder($tempFolder);
 
 //Copy files from project folder to temp folder
 $convert->copyToFolder();
@@ -143,14 +206,32 @@ foreach ($filesWithClass as $file) {
 }
 
 //Copy files from temp folder to return folder
-$convert->copyToFolder($tempFolder, $return);
+$convert->copyToFolder($tempFolder, $returnFolder);
 
 //Print all files edited
-print_r($filesWithClass);
+if(count($filesWithClass) > 0){
+    echo "Files edited: \n";
+    foreach ($filesWithClass as $file) {
+        echo $file . "\n";
+    }
+} else {
+    echo "No files edited \n";
+}
 
-//Clear temp folder
-$convert->clearFolder();
+//Detect xajax
+$filesWithXajax = $convert->detectXajax();
 
+if($filesWithXajax){
+    echo "Xajax as been detected on the project \n";
+    $xajaxAdd = readline("Do you want to update and add xajax to the project? (y/n)");
+
+    if($xajaxAdd == "y"){
+        $convert->copyToFolder($xajaxFolder, $returnFolder);
+    }
+
+} else {
+    echo "No xajax detected \n";
+}
 
 
 ?>
