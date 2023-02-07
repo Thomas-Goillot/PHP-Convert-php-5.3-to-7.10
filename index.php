@@ -13,6 +13,7 @@ $log = new Log();
 //demander a l'utilisateur le chemin du dossier du projet
 $log->ask("Enter the path of the project folder: ");
 $projectFolder = readline();
+$projectFolder = str_replace(" ", "", $projectFolder);
 
 $log->info("The project folder is: $projectFolder");
 
