@@ -183,8 +183,6 @@ class Convert
     
             $filesWithUndefinedConstant = array();
 
-            //check if there is something like $var[CONSTANT] in the file
-
             foreach ($files as $file) {
                 $content = file_get_contents($file);
                 $pattern = '/\$\w+\[.*\]/';
@@ -202,18 +200,11 @@ class Convert
     public function replaceUndefinedConstant($file){
         $content = file_get_contents($file);
 
-        /* 
-        cho "<td class='colonne'>".$row[libelle]."</td>";
-        $liste_bis   = $dossier->verif_alerte5_bis($row[id_caisse]);
-        $row[libelle] = $liste_bis[0]['nbre']; 
-        $tab_caisse[$row[id_caisse]]['id_caisse'] = $row['id_caisse'];
-
-        //fais moi une regex qui selectionne tout [CONSTANT] et qui remplace par ['CONSTANT'] mais qui ne remplace pas si [$*var*] ou [$*var*['CONSTANT']]
-        */
+        
+        //regex to find all things like : [variable] or [variable][variable] or [variable][variable][variable] and replace by ['variable'] or ['variable']['variable'] or ['variable']['variable']['variable'] ignore if [$variable]
         $pattern = '/\$\w+\[^$.*\]/';
-
         $content = preg_replace($pattern, "['$0']", $content);
-        if ($this->debug) $this->log->debug("Undefined constant replaced in file: " . $file . "\n");
+                if ($this->debug) $this->log->debug("Undefined constant replaced in file: " . $file . "\n");
         
         file_put_contents($file, $content);
     }
