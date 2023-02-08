@@ -37,8 +37,6 @@ if($convert->copyToFolder()){
     exit;
 }
 
-
-
 //Get all files with class
 $filesWithClass = $convert->getAllFilesWithClass();
 
@@ -59,6 +57,14 @@ if(count($filesWithClass) > 0){
     $log->warning("No files have been edited\n");
 }
 
+$filesWithUndefinedConstant = $convert->getAllFilesWithUndefinedConstant();
+
+foreach ($filesWithUndefinedConstant as $file) {
+    $convert->replaceUndefinedConstant($file);
+}
+
+
+
 //Detect xajax
 $filesWithXajax = $convert->detectXajax();
 
@@ -76,8 +82,7 @@ if($filesWithXajax){
 
     $log->ask("Do you want to change the path of xajax path in the project? (y/n): ");
     if(readline() == "y"){
-        $log->ask("Do you want to activate the debug mode for the path (recommended)? (y/n): ");
-        $convert->changeXajaxPath(readline() == "y");
+        $convert->changeXajaxPath();
     }
 
 } else {
@@ -87,6 +92,9 @@ if($filesWithXajax){
 //Copy files from temp folder to return folder
 $convert->copyToFolder($tempFolder, $returnFolder);
 
+unset($convert);
+
 $log->success("The project has been converted successfully (You can find the converted project in the return folder)");
+$log->warning("It is recommended to check the project before using it in production");
 
 ?>

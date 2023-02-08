@@ -34,6 +34,6 @@ class Log
 
     public function debug($text)
     {
-        echo "[\033[35m DEBUG\033[0m ] $text\n";
+        echo "[\033[35m DEBUG\033[0m ] $text";
     }
 }
