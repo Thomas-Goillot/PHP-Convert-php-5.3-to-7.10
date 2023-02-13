@@ -1,5 +1,4 @@
 <?php
-
 class Convert
 {
 
@@ -27,6 +26,74 @@ class Convert
     * @param bool $debug
     */
     public $debug = true;
+
+
+    //list of all function depecrated in php 7.2
+    public $depecratedFunctions = array(
+        "create_function",
+        "each",
+        "ereg",
+        "ereg_replace",
+        "eregi",
+        "eregi_replace",
+        "set_magic_quotes_runtime",
+        "magic_quotes_runtime",
+        "session_register",
+        "session_unregister",
+        "session_is_registered",
+        "mysql_db_query",
+        "mysql_escape_string",
+        "mysql_list_dbs",
+        "mysql_list_fields",
+        "mysql_list_processes",
+        "mysql_list_tables",
+        "mysql_tablename",
+        "mysql_db_name",
+        "mysql_result",
+        "mysql_list_dbs",
+        "mysql_list_fields",
+        "mysql_list_processes",
+        "mysql_list_tables",
+        "mysql_tablename",
+        "mysql_db_name",
+        "mysql_result",
+        "mysql",
+        "mysql_pconnect",
+        "mysql_connect",
+        "mysql_close",
+        "mysql_select_db",
+        "mysql_create_db",
+        "mysql_drop_db",
+        "mysql_query",
+        "mysql_unbuffered_query",
+        "mysql_db_query",
+        "mysql_list_dbs",
+        "mysql_list_tables",
+        "mysql_list_fields",
+        "mysql_list_processes",
+        "mysql_error",
+        "mysql_errno",
+        "mysql_affected_rows",
+        "mysql_insert_id",
+        "mysql_result",
+        "mysql_num_rows",
+        "mysql_num_fields",
+        "mysql_fetch_row",
+        "mysql_fetch_array",
+        "mysql_fetch_assoc",
+        "mysql_fetch_object",
+        "mysql_data_seek",
+        "mysql_fetch_lengths",
+        "mysql_fetch_field",
+        "mysql_field_seek",
+        "mysql_free_result",
+        "mysql_field_name",
+        "mysql_field_table",
+        "mysql_field_len",
+        "mysql_field_type",
+        "mysql_field_flags",
+        "money_format",
+    );
 
 
     /* 
@@ -211,13 +278,13 @@ class Convert
     * @param string $content = ""
     * @return string
     */
-    public function checkPatternAndReplace(string $file, string $search, string $pattern, string $replace, string $content = ""): string{
+    public function checkPatternAndReplace(string $file, string $search, string $pattern, string $replace, string $content = ""): bool{
         //in the content of the file get the line where is this $xajax->printJavascript('../commun/xajax_05/');
         preg_match_all($pattern, $content, $matches);
 
         //if matches is empty, then continue
         if (count($matches[0]) == 0) {
-            return "";
+            return false;
         }
 
         //replace the path with the new path
@@ -231,7 +298,17 @@ class Convert
 
         if($this->debug) $this->log->debug("File: ".$file." - Search: ".$search." - Replace: ".$replace."\n");
 
-        return $matches[0][0];
+        if($matches[0][0] == $newLine){
+            $this->log->error("No change in the file: ".$file." but change expected !\n");
+            return false;
+        }
+
+        if($matches[0][0] == $pattern){
+            return false;
+        }
+
+
+        return true;
     }
 
     /* 
@@ -259,7 +336,9 @@ class Convert
             }
 
             $matches = "";
-            $matches = $this->checkPatternAndReplace($file, "../commun/xajax_05/", '/\$xajax->printJavascript\((.*?)\)/', $newPath, $content);
+            if ($matches != true) $matches = $this->checkPatternAndReplace($file, "*/xajax_05/", '/\$xajax->printJavascript\((.*?)\)/', $newPath, $content);
+            if ($matches != true) $matches = $this->checkPatternAndReplace($file, "../commun/xajax_05/", '/\$xajax->printJavascript\((.*?)\)/', $newPath, $content);
+            if ($matches != true) $matches = $this->checkPatternAndReplace($file, "xajax_05/", '/\$xajax->printJavascript\(()\)/', $newPath, $content);
 
             if ($this->debug == true && $matches != "") {
                 $this->log->debug("file: " . $file . " - line: " . $matches . "\n");
@@ -272,17 +351,29 @@ class Convert
             if ($fileName == "use_xajax") {
                 $matches = "";
                 $newPath = "" . $newPath . "xajax_core/xajax.inc.php";
-                //find require_once ("../../commun/xajax_05/xajax_core/xajax.inc.php"); and replace it with require_once ("xajaxPHP7.2/xajax_core/xajax.inc.php");
-                $matches = $this->checkPatternAndReplace($file, "../../commun/xajax_05/xajax_core/xajax.inc.php", '/require_once\s*\((.*?)\)/', $newPath , $content);
 
-                if($this->debug == true && $matches != ""){
+                if($matches != true) $matches = $this->checkPatternAndReplace($file, "../commun/xajax_05/xajax_core/xajax.inc.php", '/require_once\s*\((.*?)\)/', $newPath , $content);
+                if($matches != true) $matches = $this->checkPatternAndReplace($file, "../../commun/xajax_05/xajax_core/xajax.inc.php", '/require_once\s*\((.*?)\)/', $newPath , $content);
+                if($matches != true) $matches = $this->checkPatternAndReplace($file, "../../../commun/xajax_05/xajax_core/xajax.inc.php", '/require_once\s*\((.*?)\)/', $newPath , $content);
+                if($matches != true) $matches = $this->checkPatternAndReplace($file, "../../../../commun/xajax_05/xajax_core/xajax.inc.php", '/require_once\s*\((.*?)\)/', $newPath , $content);
+
+                if($this->debug == true && $matches != false){
                     $this->log->debug("file: ".$file." - line: ".$matches."\n");
                 }
 
-                if($matches == ""){
+                if($matches == false){
                     $this->log->error("The file ".$file." has not been changed. Please check the path of xajax in this file.");
-                    $this->log->debug("you should change the path of the require to ".$newPath."xajax_core/xajax.inc.php");
-                    exit;
+                    if($this->debug) $this->log->debug("You should change the path of the require to ".$newPath."\n");
+
+                    $this->log->ask("Do you want to ignore this file ? (y/n)");
+                    $answer = readline();
+                    if($answer == "y"){
+                        $this->log->warning("The file ".$file." will be ignored but consider to change the path of xajax in this file !");
+                    }
+                    else{
+                        $this->log->error("EOF");
+                        exit;
+                    }
                 }
 
             }           
@@ -326,6 +417,33 @@ class Convert
 
             if($this->debug) $this->log->debug("File: ".$file." - Search: __autoload - Replace: spl_autoload_register\n");
         }
+    }
+
+    public function checkDeprecatedFunction($function){
+        $files = $this->getAllFile("php");
+
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+
+            $pattern = '/'.$function.'/';
+            preg_match_all($pattern, $content, $matches);            
+
+            //if matches is empty, then continue
+            if (count($matches[0]) == 0) {
+                continue;
+            }
+
+            $this->log->warning("The function \033[33m".$function. "\033[0m is deprecated in the file ".$file);
+        }
+    }
+
+    public function checkAllDeprecatedFunctions(){
+        $this->debug = false;
+        foreach ($this->depecratedFunctions as $function) {
+            $this->checkDeprecatedFunction($function);
+        }
+        $this->debug = true;
+
     }
 
     public function __destruct(){

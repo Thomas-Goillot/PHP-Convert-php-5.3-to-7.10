@@ -13,9 +13,6 @@ $xajaxFolder = "xajax/";
 
 $log = new Log();
 
-
-//demander a l'utilisateur le chemin du dossier du projet
-/* $projectFolder = "D:\Documents\Projet\CPAM\art315_test"; */
 $log->ask("Enter the path of the project folder: ");
 $projectFolder = readline();
 $projectFolder = str_replace(" ", "", $projectFolder);
@@ -45,16 +42,14 @@ if($convert->copyToFolder()){
 $filesWithClass = $convert->getAllFilesWithClass();
 
 //Replace constructor name with __construct
+if($convert->debug) $log->debug("The following files have been edited: \n");
 foreach ($filesWithClass as $file) {
     $convert->replaceConstructor($file);
+    //if($convert->debug) $log->debug("- ".$file);
 }
 
 //Print all files edited
 if(count($filesWithClass) > 0){
-    $log->info("The following files have been edited: ");
-    foreach ($filesWithClass as $file) {
-        $log->info("- ".$file);
-    }
     echo "\n";
     $log->success("".count($filesWithClass)." files edited\n");
 } else {
@@ -62,11 +57,6 @@ if(count($filesWithClass) > 0){
 }
 
 //$convert->checkAutoLoad();
-
-
-/* 
-=========== [const] => ["const"] ===========
-*/
 
 
 $result = (new CodeCleanUp())
@@ -79,9 +69,9 @@ $filesChanged = $result->filesChanged;
 
 if($convert->debug){
     if(count($filesChanged) > 0){
-        $log->info("The following files have been edited: ");
+        $log->debug("The following files have been edited: ");
         foreach ($filesChanged as $file) {
-            $log->info("- ".$file);
+            $log->debug("- ".$file);
         }
     }
 }
@@ -104,6 +94,9 @@ if(count($filesErrors) > 0){
     $log->error("Some files have not been edited and might contained errors\n");
 }
 
+
+$log->info("Checking for deprecated functions...");
+$convert->checkAllDeprecatedFunctions();
 
 //Detect xajax
 $filesWithXajax = $convert->detectXajax();
@@ -131,7 +124,6 @@ if($filesWithXajax){
 
 $log->info("The project is being converted... (This may take a few minutes)");
 
-//Copy files from temp folder to return folder
 $convert->copyToFolder($tempFolder, $returnFolder);
 
 unset($convert);
