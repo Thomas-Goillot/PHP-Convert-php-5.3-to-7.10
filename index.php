@@ -1,4 +1,8 @@
-<?php 
+<?php
+
+require(__DIR__ . '/lx-utils/vendor/autoload.php');
+
+use Lx\Utils\CodeCleanUp\CodeCleanUp;
 
 include 'logColor.php';
 include 'convert.php';
@@ -57,12 +61,48 @@ if(count($filesWithClass) > 0){
     $log->warning("No files have been edited\n");
 }
 
-$filesWithUndefinedConstant = $convert->getAllFilesWithUndefinedConstant();
+//$convert->checkAutoLoad();
 
-foreach ($filesWithUndefinedConstant as $file) {
-    $convert->replaceUndefinedConstant($file);
+
+/* 
+=========== [const] => ["const"] ===========
+*/
+
+
+$result = (new CodeCleanUp())
+    ->addFilePath($tempFolder)
+    ->addFileExtension('php')
+    ->addTask(CodeCleanUp::TASK_QUOTE_UNDEFINED_CONSTANTS_IN_SQUARE_BRACKETS)
+    ->run();
+
+$filesChanged = $result->filesChanged;
+
+if($convert->debug){
+    if(count($filesChanged) > 0){
+        $log->info("The following files have been edited: ");
+        foreach ($filesChanged as $file) {
+            $log->info("- ".$file);
+        }
+    }
 }
 
+if(count($filesChanged) > 0){
+    $log->success("".count($filesChanged)." files edited (const change) \n");
+} else {
+    $log->warning("No files have been edited (const change)\n");
+}
+
+$filesErrors = $result->errors;
+
+if($convert->debug){
+    foreach ($filesErrors as $file) {
+        $log->error("- ".$file . " might contained errors");
+    }
+}
+
+if(count($filesErrors) > 0){
+    $log->error("Some files have not been edited and might contained errors\n");
+}
 
 
 //Detect xajax

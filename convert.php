@@ -175,42 +175,6 @@ class Convert
 
     }
 
-
-    public function getAllFilesWithUndefinedConstant(){
-            
-            $files = $this->getAllFile();     
-    
-            $filesWithUndefinedConstant = array();
-
-            foreach ($files as $file) {
-                $content = file_get_contents($file);
-                $pattern = '/\$\w+\[.*\]/';
-                preg_match_all($pattern, $content, $matches);
-                if (count($matches[0]) > 0) {
-                    array_push($filesWithUndefinedConstant, $file);
-                }
-            }
-
-            if($this->debug) $this->log->debug("Files with undefined constant found: ".count($filesWithUndefinedConstant)."\n");
-    
-            return $filesWithUndefinedConstant;
-    }
-
-    public function replaceUndefinedConstant($file){
-        $content = file_get_contents($file);
-
-        
-        //regex to find all things like : [variable] or [variable][variable] or [variable][variable][variable] and replace by ['variable'] or ['variable']['variable'] or ['variable']['variable']['variable'] ignore if [$variable]
-        $pattern = '/\$\w+\[^$.*\]/';
-        $content = preg_replace($pattern, "['$0']", $content);
-                if ($this->debug) $this->log->debug("Undefined constant replaced in file: " . $file . "\n");
-        
-        file_put_contents($file, $content);
-    }
-
-
-
-
     /* 
     * @return bool
     */
@@ -335,6 +299,32 @@ class Convert
             $this->log->success("All files were read successfully");
         } else {
             $this->log->info("The path of xajax has been checked in " . $totalFiles . " files and " . $errors . " files could not be read.");
+        }
+    }
+
+    public function checkAutoLoad():void{
+        $files = $this->getAllFile("php");
+
+        //check trought every file to find __autoload and replace it with spl_autoload_register
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+
+            //find __autoload and replace it with spl_autoload_register
+            $pattern = '/__autoload/';
+            preg_match_all($pattern, $content, $matches);
+
+            //if matches is empty, then continue
+            if (count($matches[0]) == 0) {
+                continue;
+            }
+
+            //replace the line in the content
+            $content = str_replace($matches[0][0], "spl_autoload_register", $content);
+
+            //save the content in the file
+            file_put_contents($file, $content);
+
+            if($this->debug) $this->log->debug("File: ".$file." - Search: __autoload - Replace: spl_autoload_register\n");
         }
     }
 
