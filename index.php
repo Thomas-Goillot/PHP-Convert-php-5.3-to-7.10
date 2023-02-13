@@ -89,6 +89,8 @@ if($filesWithXajax){
     $log->info("Xajax not detected in the project");
 }
 
+$log->info("The project is being converted... (This may take a few minutes)");
+
 //Copy files from temp folder to return folder
 $convert->copyToFolder($tempFolder, $returnFolder);
 

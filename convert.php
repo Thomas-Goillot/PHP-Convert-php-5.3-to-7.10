@@ -55,7 +55,7 @@ class Convert
     * @param string $filter
     * @return array
     */
-    public function getAllFile(string $filter = ""): array{
+    public function getAllFile(string $filter = ""): array{        
         $files = array();
         $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->tempFolder));
         foreach ($iterator as $file) {
@@ -69,7 +69,6 @@ class Convert
                 return strpos($file, $filter) !== false;
             });
         }
-
         if ($filter !== "") $filter = " with the filter: \"" . $filter."\"";
         if($this->debug) $this->log->debug("Files found: ".count($files).$filter."\n");
 
