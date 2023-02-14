@@ -71,7 +71,7 @@ if($convert->debug){
     if(count($filesChanged) > 0){
         $log->debug("The following files have been edited: ");
         foreach ($filesChanged as $file) {
-            $log->debug("- ".$file);
+            $log->debug("- ".$file."\n");
         }
     }
 }
@@ -97,6 +97,8 @@ if(count($filesErrors) > 0){
 
 $log->info("Checking for deprecated functions...");
 $convert->checkAllDeprecatedFunctions();
+echo "\n";
+
 
 //Detect xajax
 $filesWithXajax = $convert->detectXajax();
