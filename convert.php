@@ -101,8 +101,7 @@ class Convert
     * @param string $tempFolder
     * @param string $returnFolder
     */
-    public function __construct(string $projectFolder, string $tempFolder, string $returnFolder, bool $debug = false)
-    {
+    public function __construct(string $projectFolder, string $tempFolder, string $returnFolder, bool $debug = false){
 
         $this->log = new Log();
 
@@ -119,6 +118,10 @@ class Convert
         $this->returnFolder = $returnFolder;
         $this->debug = $debug;
     }
+
+    //========================================================================================================
+    //================================================  UTILS  ===============================================
+    //========================================================================================================
 
     /* 
     * @param string $filter
@@ -198,6 +201,10 @@ class Convert
 
     }
 
+    //==================================================================================================
+    //======================================= CONSTRUCTOR ==============================================
+    //==================================================================================================
+
     /* 
     * @return array
     */
@@ -244,6 +251,10 @@ class Convert
 
     }
 
+    //==================================================================================================
+    //=========================================== XAJAX ================================================
+    //==================================================================================================
+
     /* 
     * @return bool
     */
@@ -274,19 +285,16 @@ class Convert
 
     /* 
     * @param string $file
-    * @param string $search
-    * @param string $pattern
-    * @param string $replace
-    * @param string $content = ""
     * @return string
     */
     public function checkPatternAndReplace(string $file): bool{
 
         $content = file_get_contents($file);
         $search = 'xajax_05'; // Chaîne à rechercher
+        $replace = 'xajaxPHP7.2';
         $dirname = dirname($file) . "/";
-        if ($dirname == $this->tempFolder) $replace = 'xajaxPHP7.2';
-        else $replace = '../xajaxPHP7.2';
+        
+        if ($dirname != $this->tempFolder) $replace = '../xajaxPHP7.2';
         
         
         if (strpos($content, $search) !== false) {
@@ -349,11 +357,15 @@ class Convert
             $this->log->error("The path of xajax has not been changed.");
             exit;
         } else if ($errors == 0) {
-            $this->log->success("All files were read successfully");
+            $this->log->success("All files were read/edit successfully");
         } else {
             $this->log->info("The path of xajax has been checked in " . $totalFiles . " files and " . $errors . " files could not be read.");
         }
     }
+
+    //==================================================================================================
+    //=========================================== AUTOLOAD =============================================
+    //==================================================================================================
 
     public function checkAutoLoad():void{
         $files = $this->getAllFile("php");
@@ -371,15 +383,33 @@ class Convert
                 continue;
             }
 
-            //replace the line in the content
-            $content = str_replace($matches[0][0], "spl_autoload_register", $content);
+            $content = str_replace($matches[0][0], "myAutoload", $content);
 
+            $content = str_replace("?>", "", $content);
+            $content .= "\nspl_autoload_register(\"myAutoload\");";
+            $content .= "\n?>";
+            
             //save the content in the file
-            file_put_contents($file, $content);
-
+            try
+            {
+                file_put_contents($file, $content);
+            }
+            catch(\Exception $e)
+            {
+                $this->log->error("Cannot write in the file ".$file." : ".$e->getMessage());
+                exit;
+            }
             if($this->debug) $this->log->debug("File: ".$file." - Search: __autoload - Replace: spl_autoload_register\n");
+            
         }
+        
+        $this->log->success("Autoload function has been checked and replaced successfully");
+
     }
+
+    //==================================================================================================
+    //==================================== DEPRECATED FUNCTION =========================================
+    //==================================================================================================
 
     public function checkDeprecatedFunction($function){
         $files = $this->getAllFile("php");
@@ -407,6 +437,10 @@ class Convert
         $this->debug = true;
 
     }
+
+    //==================================================================================================
+    //=========================================== OTHERS ===============================================
+    //==================================================================================================
 
     public function __destruct(){
         $this->debug = false;

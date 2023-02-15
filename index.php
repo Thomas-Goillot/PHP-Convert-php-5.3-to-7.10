@@ -49,7 +49,7 @@ if($convert->copyToFolder()){
 }
 
 //==================================================================================================
-//======================================= CONSTRUCTOR ===============================================
+//======================================= CONSTRUCTOR ==============================================
 //==================================================================================================
 
 //Get all files with class
@@ -64,7 +64,6 @@ foreach ($filesWithClass as $file) {
 
 //Print all files edited
 if(count($filesWithClass) > 0){
-    echo "\n";
     $log->success("".count($filesWithClass)." files edited with new constructor method");
 } else {
     $log->warning("No files have been edited for the new constructor method");
@@ -75,7 +74,7 @@ if(count($filesWithClass) > 0){
 //======================================= AUTOLOAD =================================================
 //==================================================================================================
 
-//$convert->checkAutoLoad();
+$convert->checkAutoLoad();
 
 
 //==================================================================================================
@@ -102,9 +101,9 @@ if(readline() == "y"){
     }
 
     if (count($filesChanged) > 0) {
-        $log->success("" . count($filesChanged) . " files edited to avoid constant errors \n");
+        $log->success("" . count($filesChanged) . " files edited to avoid constant errors ");
     } else {
-        $log->warning("No files have been edited (const change)\n");
+        $log->success("No files have been edited (const change)");
     }
 
     $filesErrors = $result->errors;
@@ -116,7 +115,7 @@ if(readline() == "y"){
     }
 
     if (count($filesErrors) > 0) {
-        $log->error("Some files have not been edited and might contained errors\n");
+        $log->error("Some files have not been edited and might contained errors");
     }
 }
 
