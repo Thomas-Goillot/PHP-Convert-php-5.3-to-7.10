@@ -101,7 +101,7 @@ class Convert
     * @param string $tempFolder
     * @param string $returnFolder
     */
-    public function __construct(string $projectFolder, string $tempFolder, string $returnFolder)
+    public function __construct(string $projectFolder, string $tempFolder, string $returnFolder, bool $debug = false)
     {
 
         $this->log = new Log();
@@ -116,6 +116,8 @@ class Convert
 
         $this->projectFolder = $projectFolder;
         $this->tempFolder = $tempFolder;
+        $this->returnFolder = $returnFolder;
+        $this->debug = $debug;
     }
 
     /* 
@@ -278,37 +280,38 @@ class Convert
     * @param string $content = ""
     * @return string
     */
-    public function checkPatternAndReplace(string $file, string $search, string $pattern, string $replace, string $content = ""): bool{
-        //in the content of the file get the line where is this $xajax->printJavascript('../commun/xajax_05/');
-        preg_match_all($pattern, $content, $matches);
+    public function checkPatternAndReplace(string $file): bool{
 
-        //if matches is empty, then continue
-        if (count($matches[0]) == 0) {
-            return false;
+        $content = file_get_contents($file);
+        $search = 'xajax_05'; // Chaîne à rechercher
+        $dirname = dirname($file) . "/";
+        if ($dirname == $this->tempFolder) $replace = 'xajaxPHP7.2';
+        else $replace = '../xajaxPHP7.2';
+        
+        
+        if (strpos($content, $search) !== false) {
+
+            $fileName = pathinfo($file, PATHINFO_FILENAME);
+
+            if ($fileName != "use_xajax") {
+                $output = preg_replace("/\\\$xajax->printJavascript\\((?:[^()]|(?R))*$search(?:[^()]|(?R))*\\)/", "\$xajax->printJavascript('$replace')", $content);   
+
+                file_put_contents($file, $output);
+
+                if ($this->debug) $this->log->debug("Pattern replaced in file: " . $file . "(Replace: " . $replace . ")\n");
+            }
+            else{
+                $output = preg_replace("/\\brequire_once\\s*\\((?:[^()]|(?R))*$search(?:[^()]|(?R))*\\)/", "require_once('$replace/xajax_core/xajax.inc.php')", $content);
+
+                file_put_contents($file, $output);
+
+                if ($this->debug) $this->log->debug("Pattern replaced in file: " . $file . "(Replace: " . $replace . ")\n");
+            }
+            return true;
+            
         }
 
-        //replace the path with the new path
-        $newLine = str_replace($search, $replace, $matches[0][0]);
-
-        //replace the line in the content
-        $content = str_replace($matches[0][0], $newLine, $content);
-
-        //save the content in the file
-        file_put_contents($file, $content);
-
-        if($this->debug) $this->log->debug("File: ".$file." - Search: ".$search." - Replace: ".$replace."\n");
-
-        if($matches[0][0] == $newLine){
-            $this->log->error("No change in the file: ".$file." but change expected !\n");
-            return false;
-        }
-
-        if($matches[0][0] == $pattern){
-            return false;
-        }
-
-
-        return true;
+        return false;      
     }
 
     /* 
@@ -335,48 +338,7 @@ class Convert
                 continue;
             }
 
-            $matches = "";
-            if ($matches != true) $matches = $this->checkPatternAndReplace($file, "*/xajax_05/", '/\$xajax->printJavascript\((.*?)\)/', $newPath, $content);
-            if ($matches != true) $matches = $this->checkPatternAndReplace($file, "../commun/xajax_05/", '/\$xajax->printJavascript\((.*?)\)/', $newPath, $content);
-            if ($matches != true) $matches = $this->checkPatternAndReplace($file, "xajax_05/", '/\$xajax->printJavascript\(()\)/', $newPath, $content);
-
-            if ($this->debug == true && $matches != "") {
-                $this->log->debug("file: " . $file . " - line: " . $matches . "\n");
-            }
-
-
-            //get the file name
-            $fileName = pathinfo($file, PATHINFO_FILENAME);
-
-            if ($fileName == "use_xajax") {
-                $matches = "";
-                $newPath = "" . $newPath . "xajax_core/xajax.inc.php";
-
-                if($matches != true) $matches = $this->checkPatternAndReplace($file, "../commun/xajax_05/xajax_core/xajax.inc.php", '/require_once\s*\((.*?)\)/', $newPath , $content);
-                if($matches != true) $matches = $this->checkPatternAndReplace($file, "../../commun/xajax_05/xajax_core/xajax.inc.php", '/require_once\s*\((.*?)\)/', $newPath , $content);
-                if($matches != true) $matches = $this->checkPatternAndReplace($file, "../../../commun/xajax_05/xajax_core/xajax.inc.php", '/require_once\s*\((.*?)\)/', $newPath , $content);
-                if($matches != true) $matches = $this->checkPatternAndReplace($file, "../../../../commun/xajax_05/xajax_core/xajax.inc.php", '/require_once\s*\((.*?)\)/', $newPath , $content);
-
-                if($this->debug == true && $matches != false){
-                    $this->log->debug("file: ".$file." - line: ".$matches."\n");
-                }
-
-                if($matches == false){
-                    $this->log->error("The file ".$file." has not been changed. Please check the path of xajax in this file.");
-                    if($this->debug) $this->log->debug("You should change the path of the require to ".$newPath."\n");
-
-                    $this->log->ask("Do you want to ignore this file ? (y/n)");
-                    $answer = readline();
-                    if($answer == "y"){
-                        $this->log->warning("The file ".$file." will be ignored but consider to change the path of xajax in this file !");
-                    }
-                    else{
-                        $this->log->error("EOF");
-                        exit;
-                    }
-                }
-
-            }           
+            $this->checkPatternAndReplace($file);            
         }
 
         restore_error_handler();
