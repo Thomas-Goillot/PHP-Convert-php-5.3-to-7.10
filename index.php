@@ -1,21 +1,27 @@
 <?php
+//==================================================================================================
+//================================= CONFIGURATION & QUESTIONS ======================================
+//==================================================================================================
 
 require(__DIR__ . '/lx-utils/vendor/autoload.php');
 
 use Lx\Utils\CodeCleanUp\CodeCleanUp;
 
+include 'config.php';
 include 'logColor.php';
 include 'convert.php';
 
-$tempFolder = "temp/";
-$returnFolder = "return/";
-$xajaxFolder = "xajax/";
-
 $log = new Log();
 
-$log->ask("Enter the path of the project folder: ");
-$projectFolder = readline();
-$projectFolder = str_replace(" ", "", $projectFolder);
+
+if(isset($argv[1])){
+    $projectFolder = $argv[1];
+    $projectFolder = str_replace(" ", "", $projectFolder);
+} else {
+    $log->ask("Enter the path of the project folder: ");
+    $projectFolder = readline();
+    $projectFolder = str_replace(" ", "", $projectFolder);
+}
 
 $log->info("The project folder is: $projectFolder");
 
@@ -24,7 +30,11 @@ if(!is_dir($projectFolder)){
     exit;
 }
 
-$convert = new Convert($projectFolder, $tempFolder, $returnFolder);
+//==================================================================================================
+//========================================= INIT ===================================================
+//==================================================================================================
+
+$convert = new Convert($projectFolder, $tempFolder, $returnFolder, FALSE);
 
 //Clear all working folders
 $convert->clearFolder($returnFolder);
@@ -32,11 +42,15 @@ $convert->clearFolder($tempFolder);
 
 //Copy files from project folder to temp folder
 if($convert->copyToFolder()){
-    $log->success("Files copied to temp folder\n");
+    $log->success("Files copied to temp folder");
 } else {
-    $log->error("Error copying files to temp folder\n");
+    $log->error("Error copying files to temp folder");
     exit;
 }
+
+//==================================================================================================
+//======================================= CONSTRUCTOR ===============================================
+//==================================================================================================
 
 //Get all files with class
 $filesWithClass = $convert->getAllFilesWithClass();
@@ -51,56 +65,74 @@ foreach ($filesWithClass as $file) {
 //Print all files edited
 if(count($filesWithClass) > 0){
     echo "\n";
-    $log->success("".count($filesWithClass)." files edited\n");
+    $log->success("".count($filesWithClass)." files edited with new constructor method");
 } else {
-    $log->warning("No files have been edited\n");
+    $log->warning("No files have been edited for the new constructor method");
 }
+
+
+//==================================================================================================
+//======================================= AUTOLOAD =================================================
+//==================================================================================================
 
 //$convert->checkAutoLoad();
 
 
-$result = (new CodeCleanUp())
-    ->addFilePath($tempFolder)
-    ->addFileExtension('php')
-    ->addTask(CodeCleanUp::TASK_QUOTE_UNDEFINED_CONSTANTS_IN_SQUARE_BRACKETS)
-    ->run();
+//==================================================================================================
+//======================================= CODE CLEANUP =============================================
+//==================================================================================================
 
-$filesChanged = $result->filesChanged;
+$log->ask("Do you want to run the code clean up? (y/n) (This may cause some bug):");
+if(readline() == "y"){
+    $result = (new CodeCleanUp())
+        ->addFilePath($tempFolder)
+        ->addFileExtension('php')
+        ->addTask(CodeCleanUp::TASK_QUOTE_UNDEFINED_CONSTANTS_IN_SQUARE_BRACKETS)
+        ->run();
 
-if($convert->debug){
-    if(count($filesChanged) > 0){
-        $log->debug("The following files have been edited: ");
-        foreach ($filesChanged as $file) {
-            $log->debug("- ".$file."\n");
+    $filesChanged = $result->filesChanged;
+
+    if ($convert->debug) {
+        if (count($filesChanged) > 0) {
+            $log->debug("The following files have been edited: ");
+            foreach ($filesChanged as $file) {
+                $log->debug("- " . $file . "\n");
+            }
         }
     }
-}
 
-if(count($filesChanged) > 0){
-    $log->success("".count($filesChanged)." files edited (const change) \n");
-} else {
-    $log->warning("No files have been edited (const change)\n");
-}
+    if (count($filesChanged) > 0) {
+        $log->success("" . count($filesChanged) . " files edited to avoid constant errors \n");
+    } else {
+        $log->warning("No files have been edited (const change)\n");
+    }
 
-$filesErrors = $result->errors;
+    $filesErrors = $result->errors;
 
-if($convert->debug){
-    foreach ($filesErrors as $file) {
-        $log->error("- ".$file . " might contained errors");
+    if ($convert->debug) {
+        foreach ($filesErrors as $file) {
+            $log->error("- " . $file . " might contained errors");
+        }
+    }
+
+    if (count($filesErrors) > 0) {
+        $log->error("Some files have not been edited and might contained errors\n");
     }
 }
 
-if(count($filesErrors) > 0){
-    $log->error("Some files have not been edited and might contained errors\n");
-}
 
+//==================================================================================================
+//==================================== DEPRECATED FUNCTION =========================================
+//==================================================================================================
 
 $log->info("Checking for deprecated functions...");
-$convert->checkAllDeprecatedFunctions();
-echo "\n";
+//$convert->checkAllDeprecatedFunctions();
 
 
-//Detect xajax
+//==================================================================================================
+//=========================================== XAJAX ================================================
+//==================================================================================================
+
 $filesWithXajax = $convert->detectXajax();
 
 if($filesWithXajax){
@@ -123,6 +155,10 @@ if($filesWithXajax){
 } else {
     $log->info("Xajax not detected in the project");
 }
+
+//==================================================================================================
+//=================================== COPY TO RETURN FOLDER ========================================
+//==================================================================================================
 
 $log->info("The project is being converted... (This may take a few minutes)");
 
