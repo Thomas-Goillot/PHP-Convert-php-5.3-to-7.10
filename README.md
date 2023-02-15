@@ -1,20 +1,5 @@
-# Convert PHP 5.3 to PHP 7.10
+# Convert PHP 5.3 to PHP 7.2
 
-## This is a script that convert php version from 5.3 to 7.10
-
-### Installation
-
-```bash
-#PHP must be installed on your computer
-git clone https://github.com/Thomas-Goillot/PHP-Convert-php-5.3-to-7.10
-cd PHP-Convert-php-5.3-to-7.10
-```
-
-### Usage
-
-```bash
-php index.php /path/to/your/project
-```
 
 ### What it does
 
@@ -25,4 +10,33 @@ php index.php /path/to/your/project
 * Detect if xajax is used and inform the user
 * Add (y/n) xajax modified for PHP 7.2
 * Replace (y/n) xajax path 
+
+
+### Installation
+
+```bash
+#PHP must be installed on your computer
+git clone https://github.com/Thomas-Goillot/PHP-Convert-php-5.3-to-7.2
+cd PHP-Convert-php-5.3-to-7.2
+```
+
+### Usage
+
+```bash
+php index.php /path/to/your/project
+```
+
+or
+
+```bash
+php index.php 
+```
+
+### Todo 
+
+- Update list of deprecated function or add a way to update it
+- Add CLI option to skip some step
+- Improve constant detection
+- Improve xjax path detection and modification
+
 
