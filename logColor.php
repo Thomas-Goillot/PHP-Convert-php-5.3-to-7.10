@@ -36,4 +36,11 @@ class Log
     {
         echo "[\033[35m DEBUG\033[0m ] $text";
     }
+
+    public function attention($text = "")
+    {
+        echo "\n\n[\033[33m\033[1m\033[4m ATTENTION \033[0m\033[0m\033[0m] $text\n\n";
+    }
+
+
 }

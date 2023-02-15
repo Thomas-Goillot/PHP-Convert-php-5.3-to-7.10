@@ -141,6 +141,12 @@ class Convert
                 return strpos($file, $filter) !== false;
             });
         }
+
+        $files = array_filter($files, function ($file) {
+            return strpos($file, ".hg") === false;
+        });
+
+
         if ($filter !== "") $filter = " with the filter: \"" . $filter."\"";
         if($this->debug) $this->log->debug("Files found: ".count($files).$filter."\n");
 
@@ -284,6 +290,25 @@ class Convert
     }
 
     /* 
+    * @return string
+    */
+    public function getPathToUseXajax(): string{
+
+        $files = $this->getAllFile();
+
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+            $pattern = '/xajax\/use_xajax/';
+            preg_match_all($pattern, $content, $matches);
+            if (count($matches[0]) > 0) {
+                return $file;
+            }
+        }
+
+        return $matches;
+    }
+
+    /* 
     * @param string $file
     * @return string
     */
@@ -293,9 +318,7 @@ class Convert
         $search = 'xajax_05'; // Chaîne à rechercher
         $replace = 'xajaxPHP7.2';
         $dirname = dirname($file) . "/";
-        
-        if ($dirname != $this->tempFolder) $replace = '../xajaxPHP7.2';
-        
+                
         
         if (strpos($content, $search) !== false) {
 
@@ -308,7 +331,37 @@ class Convert
 
                 if ($this->debug) $this->log->debug("Pattern replaced in file: " . $file . "(Replace: " . $replace . ")\n");
             }
-            else{
+            else{            
+                $path_use_ajax_caller = $this->getPathToUseXajax(); //path to the file that contains the path to xajax
+
+                $this->log->attention("Your attention is required !");
+
+                $this->log->info("Path to the file that call use_xajax: " . $path_use_ajax_caller . "");
+                $this->log->info("Path to use_xajax: " . $file . "");
+                $this->log->ask("Please enter the path to $replace (relative to the path of the file that call use_xajax):\n");
+                $this->log->info("Format : ex: ../xajaxPHP7.2/ or xajaxPHP7.2/ (Press tab to autocomplete)");
+
+                readline_completion_function(function() {
+                    $array = array('xajaxPHP7.2/', '../xajaxPHP7.2/');
+                    return $array;
+                });
+
+                $user_path = readline();
+                
+
+                while(!file_exists($dirname . $user_path)){
+                    $this->log->error("Path is incorrect\n");
+                    $this->log->ask("Please enter the path to $replace (relative to the path of the file that call use_xajax):\n");
+                    $this->log->info("Format : ex: ../xajaxPHP7.2/ or xajaxPHP7.2/");
+                    $user_path = readline();
+                }
+                $this->log->info("Path entered: " . $user_path . "\n");
+                if(substr($user_path, -1) == "/"){
+                    $user_path = substr($user_path, 0, -1);
+                }
+                $replace = $user_path;
+
+
                 $output = preg_replace("/\\brequire_once\\s*\\((?:[^()]|(?R))*$search(?:[^()]|(?R))*\\)/", "require_once('$replace/xajax_core/xajax.inc.php')", $content);
 
                 file_put_contents($file, $output);
@@ -441,6 +494,18 @@ class Convert
     //==================================================================================================
     //=========================================== OTHERS ===============================================
     //==================================================================================================
+
+
+    public function my_readline_completion_function($input, $index) {
+        $commands = array("../xajaxPHP7.2/", "xajaxPHP7.2/");
+        $matches = array();
+        foreach($commands as $command) {
+            if (strpos($command, $input) === 0) {
+                $matches[] = $command;
+            }
+        }
+        return $matches[$index] ?? null;
+    }
 
     public function __destruct(){
         $this->debug = false;
