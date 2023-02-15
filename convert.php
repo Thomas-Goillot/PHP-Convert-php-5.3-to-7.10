@@ -148,7 +148,7 @@ class Convert
 
 
         if ($filter !== "") $filter = " with the filter: \"" . $filter."\"";
-        if($this->debug) $this->log->debug("Files found: ".count($files).$filter."\n");
+        //if($this->debug) $this->log->debug("Files found: ".count($files).$filter."\n");
 
         return $files;
     }
@@ -316,7 +316,7 @@ class Convert
 
         $content = file_get_contents($file);
         $search = 'xajax_05'; // Chaîne à rechercher
-        $replace = 'xajaxPHP7.2';
+        $replace = '../xajaxPHP7.2';
         $dirname = dirname($file) . "/";
                 
         
@@ -338,6 +338,7 @@ class Convert
 
                 $this->log->info("Path to the file that call use_xajax: " . $path_use_ajax_caller . "");
                 $this->log->info("Path to use_xajax: " . $file . "");
+                $this->log->help("Generally whent the path of the file that call use_xajax is not in the root of the project, \n you need to add ../ to the path of xajax (ex: ../xajaxPHP7.2/)");
                 $this->log->ask("Please enter the path to $replace (relative to the path of the file that call use_xajax):\n");
                 $this->log->info("Format : ex: ../xajaxPHP7.2/ or xajaxPHP7.2/ (Press tab to autocomplete)");
 
@@ -347,15 +348,9 @@ class Convert
                 });
 
                 $user_path = readline();
-                
 
-                while(!file_exists($dirname . $user_path)){
-                    $this->log->error("Path is incorrect\n");
-                    $this->log->ask("Please enter the path to $replace (relative to the path of the file that call use_xajax):\n");
-                    $this->log->info("Format : ex: ../xajaxPHP7.2/ or xajaxPHP7.2/");
-                    $user_path = readline();
-                }
                 $this->log->info("Path entered: " . $user_path . "\n");
+                
                 if(substr($user_path, -1) == "/"){
                     $user_path = substr($user_path, 0, -1);
                 }

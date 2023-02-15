@@ -34,7 +34,7 @@ if(!is_dir($projectFolder)){
 //========================================= INIT ===================================================
 //==================================================================================================
 
-$convert = new Convert($projectFolder, $tempFolder, $returnFolder, FALSE);
+$convert = new Convert($projectFolder, $tempFolder, $returnFolder, TRUE);
 
 //Clear all working folders
 $convert->clearFolder($returnFolder);
@@ -82,6 +82,10 @@ $convert->checkAutoLoad();
 //==================================================================================================
 
 $log->ask("Do you want to run the code clean up? (y/n) (This may cause some bug):");
+readline_completion_function(function () {
+    $array = array('y', 'n');
+    return $array;
+});
 if(readline() == "y"){
     $result = (new CodeCleanUp())
         ->addFilePath($tempFolder)
@@ -125,7 +129,7 @@ if(readline() == "y"){
 //==================================================================================================
 
 $log->info("Checking for deprecated functions...");
-//$convert->checkAllDeprecatedFunctions();
+$convert->checkAllDeprecatedFunctions();
 
 
 //==================================================================================================
@@ -138,6 +142,11 @@ if($filesWithXajax){
     $log->info("Xajax detected in the project");
     $log->ask("Do you want to add xajax for PHP 7.2 to the project? (y/n):  ");
 
+    readline_completion_function(function () {
+        $array = array('y', 'n');
+        return $array;
+    });
+
     if(readline() == "y"){
         if($convert->copyToFolder($xajaxFolder, $tempFolder)){
             $log->success("Xajax has been added to the project");
@@ -146,6 +155,10 @@ if($filesWithXajax){
         }
     }
 
+    readline_completion_function(function () {
+        $array = array('y', 'n');
+        return $array;
+    });
     $log->ask("Do you want to change the path of xajax path in the project? (y/n): ");
     if(readline() == "y"){
         $convert->changeXajaxPath();
@@ -161,11 +174,19 @@ if($filesWithXajax){
 
 $log->info("The project is being converted... (This may take a few minutes)");
 
-$convert->copyToFolder($tempFolder, $returnFolder);
+
+//create a folder with the name of the project
+$projectName = basename($projectFolder);
+$projectDir = "C:/wamp/www/$projectName-converted";
+mkdir($projectDir);
+$convert->copyToFolder($tempFolder, $projectDir);
+
+
 
 unset($convert);
 
 $log->success("The project has been converted successfully (You can find the converted project in the return folder)");
 $log->warning("It is recommended to check the project before using it in production");
 
+echo "http://localhost:81/$projectName-converted";
 ?>
