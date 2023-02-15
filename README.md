@@ -1,6 +1,22 @@
-# convertphpversion
+# Convert PHP 5.3 to PHP 7.10
 
-This is a script that convert php version from 5.3 to 7.10
+## This is a script that convert php version from 5.3 to 7.10
+
+### Installation
+
+```bash
+#PHP must be installed on your computer
+git clone https://github.com/Thomas-Goillot/PHP-Convert-php-5.3-to-7.10
+cd PHP-Convert-php-5.3-to-7.10
+```
+
+### Usage
+
+```bash
+php index.php /path/to/your/project
+```
+
+### What it does
 
 * Replace old method constructor with __construct
 * Check for __autoload method and replace it with spl_autoload_register
