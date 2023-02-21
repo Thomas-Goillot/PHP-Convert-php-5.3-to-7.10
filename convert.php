@@ -308,6 +308,24 @@ class Convert
         return $matches;
     }
 
+    public function relativePathToXajax(string $file): string{
+
+        //get the path of the file
+        $path = dirname($file);
+        
+        //create the relative path to the xajax folder
+        $xajax = "xajaxPHP7.2";
+
+        //get the number of folders in the path
+        $numberOfFolders = substr_count($path, "\\");
+
+        for ($i = 0; $i < $numberOfFolders; $i++) {
+            $xajax = "../" . $xajax;
+        }
+
+        return $xajax;
+    }
+
     /* 
     * @param string $file
     * @return string
@@ -316,8 +334,7 @@ class Convert
 
         $content = file_get_contents($file);
         $search = 'xajax_05'; // Chaîne à rechercher
-        $replace = '../xajaxPHP7.2';
-        $dirname = dirname($file) . "/";
+        $replace = $this->relativePathToXajax($file);
                 
         
         if (strpos($content, $search) !== false) {
@@ -328,7 +345,7 @@ class Convert
                 $output = preg_replace("/\\\$xajax->printJavascript\\((?:[^()]|(?R))*$search(?:[^()]|(?R))*\\)/", "\$xajax->printJavascript('$replace')", $content);   
 
                 file_put_contents($file, $output);
-
+                
                 if ($this->debug) $this->log->debug("Pattern replaced in file: " . $file . "(Replace: " . $replace . ")\n");
             }
             else{            
@@ -338,9 +355,11 @@ class Convert
 
                 $this->log->info("Path to the file that call use_xajax: " . $path_use_ajax_caller . "");
                 $this->log->info("Path to use_xajax: " . $file . "");
-                $this->log->help("Generally whent the path of the file that call use_xajax is not in the root of the project, \n you need to add ../ to the path of xajax (ex: ../xajaxPHP7.2/)");
-                $this->log->ask("Please enter the path to $replace (relative to the path of the file that call use_xajax):\n");
+                $this->log->help("Generally when the path of the file that call use_xajax is not in the root of the project, \n you need to add ../ to the path of xajax (ex: ../xajaxPHP7.2/)");
+                $this->log->ask("Please enter the path to replace (relative to the path of the file that call use_xajax):\n");
                 $this->log->info("Format : ex: ../xajaxPHP7.2/ or xajaxPHP7.2/ (Press tab to autocomplete)");
+
+                $this->log->other("GUESS", "The path might be : ".$replace." (This is a guess it is not 100% accurate, you can change it if it is not correct)");
 
                 readline_completion_function(function() {
                     $array = array('xajaxPHP7.2/', '../xajaxPHP7.2/');
@@ -350,7 +369,7 @@ class Convert
                 $user_path = readline();
 
                 $this->log->info("Path entered: " . $user_path . "\n");
-                
+
                 if(substr($user_path, -1) == "/"){
                     $user_path = substr($user_path, 0, -1);
                 }

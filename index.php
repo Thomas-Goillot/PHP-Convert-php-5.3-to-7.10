@@ -97,7 +97,7 @@ if(readline() == "y"){
 
     if ($convert->debug) {
         if (count($filesChanged) > 0) {
-            $log->debug("The following files have been edited: ");
+            $log->debug("The following files have been edited: \n");
             foreach ($filesChanged as $file) {
                 $log->debug("- " . $file . "\n");
             }

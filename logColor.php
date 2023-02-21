@@ -47,6 +47,11 @@ class Log
         echo "[". $this->light_magenta(" HELP ") ."] ". $this->light_magenta($text)."\n";
     }
 
+    public function other(string $title = "OTHERS", $text = "")
+    {
+        echo "[ ". $this->light_blue($title) ." ] ". $text."\n";
+    }
+
     public function red($text)
     {
         return "\033[31m$text\033[0m";
@@ -65,6 +70,11 @@ class Log
     public function blue($text)
     {
         return "\033[34m$text\033[0m";
+    }
+
+    public function light_blue($text)
+    {
+        return "\033[94m$text\033[0m";
     }
 
     public function magenta($text)
