@@ -169,6 +169,30 @@ if($filesWithXajax){
 }
 
 //==================================================================================================
+//=================================== CHANGE DBLIB TO SQLSRV =======================================
+//==================================================================================================
+
+$log->ask("Do you want to change the dbLib to sqlsrv? (y/n): ");
+readline_completion_function(function () {
+    $array = array('y', 'n');
+    return $array;
+});
+
+if(readline() == "y"){
+    $convert->changeDBLibToSQLSRV();
+}
+
+$log->ask("Do you want to change the connection string for sqlsrv? (y/n): ");
+readline_completion_function(function () {
+    $array = array('y', 'n');
+    return $array;
+});
+
+if(readline() == "y"){
+    $convert->changeConnectionString();
+}
+
+//==================================================================================================
 //=================================== COPY TO RETURN FOLDER ========================================
 //==================================================================================================
 

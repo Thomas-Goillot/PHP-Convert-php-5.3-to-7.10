@@ -506,6 +506,85 @@ class Convert
     }
 
     //==================================================================================================
+    //=================================== CHANGE DBLIB TO SQLSRV =======================================
+    //==================================================================================================
+
+    public function changeDBLibToSQLSRV(){
+        $files = $this->getAllFile("php");
+
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+
+            $pattern = '/dblib/';
+            preg_match_all($pattern, $content, $matches);            
+
+            //if matches is empty, then continue
+            if (count($matches[0]) == 0) {
+                continue;
+            }
+
+            $content = str_replace($matches[0][0], "sqlsrv", $content);
+
+            //save the content in the file
+            try
+            {
+                file_put_contents($file, $content);
+            }
+            catch(\Exception $e)
+            {
+                $this->log->error("Cannot write in the file ".$file." : ".$e->getMessage());
+                exit;
+            }
+            if($this->debug) $this->log->debug("File: ".$file." - Search: dblib - Replace: sqlsrv\n");
+            
+        }
+        
+        $this->log->success("DBLIB has been replaced by SQLSRV successfully");
+    }
+
+    public function changeConnectionString(){
+        $change = array(
+            //search => replace
+            "host" => "server",
+            "dbname" => "database"
+        );
+
+        $files = $this->getAllFile("php");
+
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+
+            foreach ($change as $search => $replace) {
+                $pattern = '/'.$search.'/';
+                preg_match_all($pattern, $content, $matches);            
+
+                //if matches is empty, then continue
+                if (count($matches[0]) == 0) {
+                    continue;
+                }
+
+                $content = str_replace($matches[0][0], $replace, $content);
+
+                //save the content in the file
+                try
+                {
+                    file_put_contents($file, $content);
+                }
+                catch(\Exception $e)
+                {
+                    $this->log->error("Cannot write in the file ".$file." : ".$e->getMessage());
+                    exit;
+                }
+                if($this->debug) $this->log->debug("File: ".$file." - Search: ".$search." - Replace: ".$replace."\n");
+            }
+        }
+
+        $this->log->success("Connection string has been changed successfully");
+    }
+
+
+
+    //==================================================================================================
     //=========================================== OTHERS ===============================================
     //==================================================================================================
 
