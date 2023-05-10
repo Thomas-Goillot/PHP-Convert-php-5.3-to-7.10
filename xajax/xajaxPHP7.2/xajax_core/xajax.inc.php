@@ -71,6 +71,7 @@ class xajax
 		wish to track, however, settings are available via a reference to the <xajax> 
 		object using <xajax->getConfiguration>.
 	*/
+
 	var $aSettings;
 
 	/*
@@ -836,21 +837,21 @@ class xajax
 			}
 		}
 
-		if (empty($aURL['host'])) {
+		if (empty($aURL['server'])) {
 			if (!empty($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 				if (strpos($_SERVER['HTTP_X_FORWARDED_HOST'], ':') > 0) {
-					list($aURL['host'], $aURL['port']) = explode(':', $_SERVER['HTTP_X_FORWARDED_HOST']);
+					list($aURL['server'], $aURL['port']) = explode(':', $_SERVER['HTTP_X_FORWARDED_HOST']);
 				} else {
-					$aURL['host'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+					$aURL['server'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
 				}
 			} else if (!empty($_SERVER['HTTP_HOST'])) {
 				if (strpos($_SERVER['HTTP_HOST'], ':') > 0) {
-					list($aURL['host'], $aURL['port']) = explode(':', $_SERVER['HTTP_HOST']);
+					list($aURL['server'], $aURL['port']) = explode(':', $_SERVER['HTTP_HOST']);
 				} else {
-					$aURL['host'] = $_SERVER['HTTP_HOST'];
+					$aURL['server'] = $_SERVER['HTTP_HOST'];
 				}
 			} else if (!empty($_SERVER['SERVER_NAME'])) {
-				$aURL['host'] = $_SERVER['SERVER_NAME'];
+				$aURL['server'] = $_SERVER['SERVER_NAME'];
 			} else {
 				echo $this->objLanguageManager->getText('DTCTURI:01');
 				echo $this->objLanguageManager->getText('DTCTURI:02');
@@ -896,8 +897,8 @@ class xajax
 			$sURL.= '@';
 		}
 
-		// Add the host
-		$sURL.= $aURL['host'];
+		// Add the server
+		$sURL.= $aURL['server'];
 
 		// Add the port if needed
 		if (!empty($aURL['port']) 

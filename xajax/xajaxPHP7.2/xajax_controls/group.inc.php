@@ -34,6 +34,9 @@
 
 class clsList extends xajaxControlContainer
 {
+
+	public $eventAddItem;
+
 	function clsList($sTag, $aConfiguration=array())
 	{
 		$this->clearEvent_AddItem();
@@ -72,7 +75,7 @@ class clsList extends xajaxControlContainer
 	
 	function &_onAddItem($mItem, $mConfiguration)
 	{
-		$objItem =& new clsLI(array(
+		$objItem = new clsLI(array(
 			'child' => new clsLiteral($mItem)
 			));
 		return $objItem;
@@ -194,7 +197,7 @@ class clsTableRowContainer extends xajaxControlContainer
 	
 	function &_onAddRow($aCells, $mConfiguration=null)
 	{
-		$objTableRow =& new clsTr();
+		$objTableRow = new clsTr();
 		if (null != $this->eventAddRowCell)
 			$objTableRow->setEvent_AddCell($this->eventAddRowCell);
 		$objTableRow->addCells($aCells, $mConfiguration);
@@ -374,7 +377,7 @@ class clsTable extends xajaxControlContainer
 	
 	function &_onAddHeader($aRows, $mConfiguration)
 	{
-		$objTableHeader =& new clsThead();
+		$objTableHeader = new clsThead();
 		if (null != $this->eventAddHeaderRow)
 			$objTableHeader->setEvent_AddRow($this->eventAddHeaderRow);
 		if (null != $this->eventAddHeaderRowCell)
@@ -384,7 +387,7 @@ class clsTable extends xajaxControlContainer
 	}
 	function &_onAddBody($aRows, $mConfiguration)
 	{
-		$objTableBody =& new clsTbody();
+		$objTableBody = new clsTbody();
 		if (null != $this->eventAddBodyRow)
 			$objTableBody->setEvent_AddRow($this->eventAddBodyRow);
 		if (null != $this->eventAddBodyRowCell)
@@ -394,7 +397,7 @@ class clsTable extends xajaxControlContainer
 	}
 	function &_onAddFooter($aRows, $mConfiguration)
 	{
-		$objTableFooter =& new clsTfoot();
+		$objTableFooter = new clsTfoot();
 		if (null != $this->eventAddFooterRow)
 			$objTableFooter->setEvent_AddRow($this->eventAddFooterRow);
 		if (null != $this->eventAddFooterRowCell)

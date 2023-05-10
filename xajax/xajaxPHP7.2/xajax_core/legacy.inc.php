@@ -28,7 +28,7 @@ class legacyXajaxResponse extends xajaxResponse {
 class legacyXajax extends xajax {
 	function legacyXajax($sRequestURI='', $sWrapperPrefix='xajax_', $sEncoding=XAJAX_DEFAULT_CHAR_ENCODING, $bDebug=false)
 	{
-		parent::xajax();
+		new xajax();
 		$this->configure('requestURI', $sRequestURI);
 		$this->configure('wrapperPrefix', $sWrapperPrefix);
 		$this->configure('characterEncoding', $sEncoding);
@@ -36,7 +36,7 @@ class legacyXajax extends xajax {
 	}
 	function registerExternalFunction($mFunction, $sInclude)
 	{
-		$xuf =& new xajaxUserFunction($mFunction, $sInclude);
+		$xuf = new xajaxUserFunction($mFunction, $sInclude);
 		$this->register(XAJAX_FUNCTION, $xuf);
 	}
 	function registerCatchAllFunction($mFunction)

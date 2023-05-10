@@ -66,14 +66,14 @@ class clsInputWithLabel extends clsInput
 	{
 		clsInput::clsInput($aConfiguration);
 		
-		$this->objLabel =& new clsLabel(array(
+		$this->objLabel = new clsLabel(array(
 			'child' => new clsLiteral($sLabel)
 			));
 		$this->objLabel->setControl($this);
 		
 		$this->sWhere = $sWhere;
 		
-		$this->objBreak =& new clsBr();
+		$this->objBreak = new clsBr();
 	}
 	
 	function printHTML($sIndent='')
@@ -125,7 +125,7 @@ class clsSelect extends xajaxControlContainer
 	*/
 	function addOption($sValue, $sText)
 	{
-		$optionNew =& new clsOption();
+		$optionNew = new clsOption();
 		$optionNew->setValue($sValue);
 		$optionNew->setText($sText);
 		$this->addChild($optionNew);
@@ -180,7 +180,7 @@ class clsOptionGroup extends xajaxControlContainer
 	*/
 	function addOption($sValue, $sText)
 	{
-		$optionNew =& new clsOption();
+		$optionNew = new clsOption();
 		$optionNew->setValue($sValue);
 		$optionNew->setText($sText);
 		$this->addChild($optionNew);

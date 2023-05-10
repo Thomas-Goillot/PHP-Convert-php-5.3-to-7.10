@@ -175,7 +175,7 @@ class xajaxResponse
 		
 		//SkipDebug
 		if (false == (0 < $nArgs)) {
-			$objLanguageManager =& xajaxLanguageManager::getInstance();
+			$objLanguageManager = xajaxLanguageManager::getInstance();
 			trigger_error(
 					$objLanguageManager->getText('XJXRSP:MPERR:01')
 					, E_USER_ERROR
@@ -185,7 +185,7 @@ class xajaxResponse
 		
 		$sName = array_shift($aArgs);
 		
-		$objPlugin =& $this->objPluginManager->getPlugin($sName);
+		$objPlugin = $this->objPluginManager->getPlugin($sName);
 		
 		if (false === $objPlugin)
 		{
@@ -220,7 +220,7 @@ class xajaxResponse
 	*/
 	function &__get($sPluginName)
 	{
-		$objPlugin =& $this->plugin($sPluginName);
+		$objPlugin = $this->plugin($sPluginName);
 		return $objPlugin;
 	}
 	
@@ -666,7 +666,7 @@ class xajaxResponse
 	{
 		//SkipDebug
 		if (false === (null === $sType)) {
-			$objLanguageManager =& xajaxLanguageManager::getInstance();
+			$objLanguageManager = xajaxLanguageManager::getInstance();
 			trigger_error(
 					$objLanguageManager->getText('XJXRSP:CPERR:01')
 					, E_USER_WARNING
@@ -1271,7 +1271,7 @@ class xajaxResponse
 	*/
 	function _sendHeaders()
 	{
-		$objArgumentManager =& xajaxArgumentManager::getInstance();
+		$objArgumentManager = xajaxArgumentManager::getInstance();
 		if (XAJAX_METHOD_GET == $objArgumentManager->getRequestMethod())
 		{
 			header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
@@ -1336,7 +1336,7 @@ class xajaxResponse
 			else {
 				//SkipDebug
 				if (!empty($mCommands)) {
-					$objLanguageManager =& xajaxLanguageManager::getInstance();
+					$objLanguageManager = xajaxLanguageManager::getInstance();
 					trigger_error(
 							$objLanguageManager->getText('XJXRSP:LCERR:01')
 							, E_USER_ERROR
@@ -1466,7 +1466,7 @@ class xajaxResponse
 					echo $aAttributes[$sKey];
 					echo '"';
 				} else
-					$mData =& $aAttributes[$sKey];
+					$mData = $aAttributes[$sKey];
 			}
 		}
 		
@@ -1508,7 +1508,7 @@ class xajaxResponse
 				foreach (array_keys($mArray[$sKey]) as $sInnerKey) {
 					//SkipDebug
 					if (htmlspecialchars($sInnerKey, ENT_COMPAT, 'UTF-8') != $sInnerKey) {
-						$objLanguageManager =& xajaxLanguageManager::getInstance();
+						$objLanguageManager = xajaxLanguageManager::getInstance();
 						trigger_error(
 								$objLanguageManager->getText('XJXRSP:AKERR:01')
 								, E_USER_ERROR
@@ -1527,7 +1527,7 @@ class xajaxResponse
 						echo '>';
 					} else {
 						//SkipDebug
-						$objLanguageManager =& xajaxLanguageManager::getInstance();
+						$objLanguageManager = xajaxLanguageManager::getInstance();
 						trigger_error(
 								$objLanguageManager->getText('XJXRSP:IEAERR:01')
 								, E_USER_ERROR
@@ -1540,7 +1540,7 @@ class xajaxResponse
 				echo '/e>';
 			} else {
 				//SkipDebug
-				$objLanguageManager =& xajaxLanguageManager::getInstance();
+				$objLanguageManager = xajaxLanguageManager::getInstance();
 				trigger_error(
 						$objLanguageManager->getText('XJXRSP:NEAERR:01')
 						, E_USER_ERROR
@@ -1578,7 +1578,7 @@ class xajaxResponse
 		if ($this->bOutputEntities) {
 			//SkipDebug
 			if (false === function_exists('mb_convert_encoding')) {
-				$objLanguageManager =& xajaxLanguageManager::getInstance();
+				$objLanguageManager = xajaxLanguageManager::getInstance();
 				trigger_error(
 						$objLanguageManager->getText('XJXRSP:MBEERR:01')
 						, E_USER_NOTICE
@@ -1700,7 +1700,7 @@ class xajaxCustomResponse
 		$this->sOutput = '';
 		$this->sContentType = $sContentType;
 		
-		$objResponseManager =& xajaxResponseManager::getInstance();
+		$objResponseManager = xajaxResponseManager::getInstance();
 		
 		$this->sCharacterEncoding = $objResponseManager->getCharacterEncoding();
 		$this->bOutputEntities = $objResponseManager->getOutputEntities();
@@ -1730,7 +1730,7 @@ class xajaxCustomResponse
 	{
 		//SkipDebug
 		if (false == is_a($objResponse, 'xajaxCustomResponse')) {
-			$objLanguageManager =& xajaxLanguageManager::getInstance();
+			$objLanguageManager = xajaxLanguageManager::getInstance();
 			trigger_error(
 					$objLanguageManager->getText('XJXRSP:MXRTERR')
 					, E_USER_ERROR
@@ -1738,7 +1738,7 @@ class xajaxCustomResponse
 		}
 		
 		if ($objResponse->getContentType() != $this->getContentType()) {
-			$objLanguageManager =& xajaxLanguageManager::getInstance();
+			$objLanguageManager = xajaxLanguageManager::getInstance();
 			trigger_error(
 					$objLanguageManager->getText('XJXRSP:MXCTERR')
 					, E_USER_ERROR
@@ -1746,7 +1746,7 @@ class xajaxCustomResponse
 		}
 		
 		if ($objResponse->getCharacterEncoding() != $this->getCharacterEncoding()) {
-			$objLanguageManager =& xajaxLanguageManager::getInstance();
+			$objLanguageManager = xajaxLanguageManager::getInstance();
 			trigger_error(
 					$objLanguageManager->getText('XJXRSP:MXCEERR')
 					, E_USER_ERROR
@@ -1754,7 +1754,7 @@ class xajaxCustomResponse
 		}
 		
 		if ($objResponse->getOutputEntities() != $this->getOutputEntities()) {
-			$objLanguageManager =& xajaxLanguageManager::getInstance();
+			$objLanguageManager = xajaxLanguageManager::getInstance();
 			trigger_error(
 					$objLanguageManager->getText('XJXRSP:MXOEERR')
 					, E_USER_ERROR
