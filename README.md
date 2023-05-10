@@ -10,6 +10,10 @@
 * Detect if xajax is used and inform the user
 * Add (y/n) xajax modified for PHP 7.2
 * Replace (y/n) xajax path 
+* Change DBLIB to sqlsrv (Connexion to mssql server)
+* Change of the connexion string for sqlsrv 
+
+> For DBLIB to SQLSRV string the script is looking for host and dbname in every file. Be aware that it's able to change some variables name but it will be change everywere.
 
 
 ### Installation
