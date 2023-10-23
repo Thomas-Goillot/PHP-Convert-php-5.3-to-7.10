@@ -43,4 +43,5 @@ php index.php
 - Improve constant detection
 - Improve xjax path detection and modification
 
-
+### :warning: Disclaimer:
+This project is not 100% accurate and may break your code. Please make sure you have a backup of your code before using it. I am not responsible for any damage caused by this script. Use it at your own risk. Be advise that you should always check your code after using this script.
